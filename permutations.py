@@ -136,3 +136,36 @@ def rho(state: KeccakState) -> KeccakState:
             x, y = y, 2 * x + 3 * y % 5
 
     return updated_state
+
+
+def iota(t: int) -> int:
+    """
+    The implementation of the _Iota_ permutation. For more details, see
+    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf> in
+    page 15.
+
+    Parameters:
+    -----------
+    t: integer
+        TODO
+
+    Returns:
+    rc(t): int
+        rc(t) is actually a bit.
+    """
+    mod = t % 255
+    if mod == 0:
+        return 1
+
+    r = [1, 0, 0, 0, 0, 0, 0, 0]
+    for _ in range(mod):
+       r.insert(0, 0)
+
+       r[0] = r[0] + r[8]
+       r[4] = r[4] + r[8]
+       r[5] = r[5] + r[8]
+       r[6] = r[6] + r[8]
+
+       r = r[:8]
+
+    return r[0]
