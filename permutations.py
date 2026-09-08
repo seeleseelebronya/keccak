@@ -52,6 +52,7 @@ def chi(state: KeccakState) -> KeccakState:
 
     return updated_state
 
+@jaxtyped(typechecker=typechecked)
 def theta(state: KeccakState) -> KeccakState:
     """
     The implementation of the _Theta_ permutation. For more details, see
@@ -95,6 +96,7 @@ def theta(state: KeccakState) -> KeccakState:
     return updated_state
 
 
+@jaxtyped(typechecker=typechecked)
 def pi(state: KeccakState) -> KeccakState:
     """
     The implementation of the _Pi_ permutation. For more details, see
@@ -122,6 +124,7 @@ def pi(state: KeccakState) -> KeccakState:
     return updated_state
 
 
+@jaxtyped(typechecker=typechecked)
 def rho(state: KeccakState) -> KeccakState:
     """
     The implementation of the _Rho_ permutation. For more details, see
@@ -153,6 +156,7 @@ def rho(state: KeccakState) -> KeccakState:
     return updated_state
 
 
+@jaxtyped(typechecker=typechecked)
 def iota(state: KeccakState, round_index: int) -> KeccakState:
     """
     The implementation of the _Iota_ permutation. For more details, see
