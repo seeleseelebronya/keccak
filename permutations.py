@@ -187,7 +187,7 @@ def iota(state: KeccakState, round_index: int) -> KeccakState:
         rc[2 ^ j - 1] = _rc(j + 7 * round_index)
 
     for z in range(STATE_Z):
-        updated_state = state[0, 0, z] ^ _rc[z]
+        updated_state = state[0, 0, z] ^ rc[z]
 
     return updated_state
 
