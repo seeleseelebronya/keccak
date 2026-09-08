@@ -2,8 +2,23 @@ import numpy as np
 from jaxtyping import UInt8, jaxtyped
 from typeguard import typechecked
 
+# Length of row
+STATE_X = 5
+
+# Length of column
+STATE_Y = 5
+
+# Length of lane
+STATE_Z = 64
+
+# Shape of a state, 5 x 5 x 64
+STATE_SHAPE = (STATE_X, STATE_Y, STATE_Z)
+
+# L satisfies STATE_Z = 2 ^ L
+L = int(np.log2(STATE_Z))
+
 # Type of a valid Keccak state, which is a 5 x 5 x 64 state.
-KeccakState = UInt8[np.ndarray, "5 5 64"]
+KeccakState = UInt8[np.ndarray, f"{STATE_X} {STATE_Y} {STATE_Z}"]
 
 
 @jaxtyped(typechecker=typechecked)
@@ -24,11 +39,11 @@ def chi(state: KeccakState) -> KeccakState:
     updated_state: KeccakState
         The state after _Chi_ permutation.
     """
-    updated_state = np.zeros((5, 5, 64), dtype=np.uint8)
+    updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
-    for x in range(5):
-        for y in range(5):
-            for z in range(64):
+    for x in range(STATE_X):
+        for y in range(STATE_Y):
+            for z in range(STATE_Z):
                 updated_state = (
                     state[x, y, z]
                     ^ (state[(x + 1) % 5, y, z] ^ 1)
@@ -54,11 +69,11 @@ def theta(state: KeccakState) -> KeccakState:
     updated_state: KeccakState
         The state after _Theta_ permutation.
     """
-    updated_state = np.zeros((5, 5, 64), dtype=np.uint8)
+    updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
     C = np.zeros((5, 64), dtype=np.uint8)
-    for x in range(5):
-        for z in range(64):
+    for x in range(STATE_X):
+        for z in range(STATE_Z):
             C[x, z] = (
                 state[x, 0, z]
                 ^ state[x, 1, z]
@@ -68,13 +83,13 @@ def theta(state: KeccakState) -> KeccakState:
             )
 
     D = np.zeros((5, 64), dtype=np.uint8)
-    for x in range(5):
-        for z in range(64):
+    for x in range(STATE_X):
+        for z in range(STATE_Z):
             D[x, z] = C[(x - 1) % 5, z] ^ C[(x + 1) % 5, (z - 1) % 64]
 
-    for x in range(5):
-        for y in range(5):
-            for z in range(64):
+    for x in range(STATE_X):
+        for y in range(STATE_Y):
+            for z in range(STATE_Z):
                 updated_state[x, y, z] = state[x, y, z] ^ D[x, z]
 
     return updated_state
@@ -97,11 +112,11 @@ def pi(state: KeccakState) -> KeccakState:
     updated_state: KeccakState
         The state after _Pi_ permutation.
     """
-    updated_state = np.zeros((5, 5, 64), dtype=np.uint8)
+    updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
-    for x in range(5):
-        for y in range(5):
-            for z in range(64):
+    for x in range(STATE_X):
+        for y in range(STATE_Y):
+            for z in range(STATE_Z):
                 updated_state[x, y, z] = state[(x + 3 * y) % 5, x, z]
 
     return updated_state
@@ -124,34 +139,68 @@ def rho(state: KeccakState) -> KeccakState:
     updated_state: KeccakState
         The state after _Rho_ permutation.
     """
-    updated_state = np.zeros((5, 5, 64), dtype=np.uint8)
+    updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
-    for z in range(64):
+    for z in range(STATE_Z):
         updated_state[0, 0, z] = state[0, 0, z]
 
     for t in range(24):
         x, y = 1, 0
-        for z in range(64):
+        for z in range(STATE_Z):
             updated_state = state[x, y, (z - (t + 1) * (t + 2) // 2) % 64]
             x, y = y, 2 * x + 3 * y % 5
 
     return updated_state
 
 
-def iota(t: int) -> int:
+def iota(state: KeccakState, round_index: int) -> KeccakState:
     """
     The implementation of the _Iota_ permutation. For more details, see
+    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf> in
+    page 16.
+
+    Parameters:
+    -----------
+    state: KeccakState
+        The Keccak state for the _Pi_ permutation.
+    round_index: int
+        The round index i_r.
+
+    Returns:
+    --------
+    updated_state: KeccakState
+        The state after _Pi_ permutation.
+    """
+    updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
+
+    for x in range(STATE_X):
+        for y in range(STATE_Y):
+            for z in range(STATE_Z):
+                updated_state[x, y, z] = state[x, y, z]
+
+    _rc = np.zeros(64, dtype=np.uint8)
+    for j in range(L):
+        _rc[2 ^ j - 1] = rc(j + 7 * round_index)
+
+    for z in range(STATE_Z):
+        updated_state = state[0, 0, z] ^ _rc[z]
+
+    return updated_state
+
+
+def rc(t: int) -> int:
+    """
+    A helper function for `iota()` permutation. For more details, see
     <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf> in
     page 15.
 
     Parameters:
     -----------
     t: integer
-        TODO
 
     Returns:
     rc(t): int
-        rc(t) is actually a bit.
+        Type of rc(t) is actually _bit_.
     """
     mod = t % 255
     if mod == 0:
