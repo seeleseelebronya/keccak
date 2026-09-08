@@ -147,7 +147,7 @@ def rho(state: KeccakState) -> KeccakState:
     for z in range(STATE_Z):
         updated_state[0, 0, z] = state[0, 0, z]
 
-        x, y = 1, 0
+    x, y = 1, 0
     for t in range(24):
         for z in range(STATE_Z):
             updated_state = state[x, y, (z - (t + 1) * (t + 2) // 2) % 64]
