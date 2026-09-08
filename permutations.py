@@ -10,7 +10,9 @@ KeccakState = UInt8[np.ndarray, "5 5 64"]
 def chi(state: KeccakState) -> KeccakState:
     """
     The implementation of the _Chi_ permutation. For more details, see
-    <https://keccak.team/files/Keccak-reference-3.0.pdf> in page 15.
+    <https://keccak.team/files/Keccak-reference-3.0.pdf> in page 15, or see
+    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf>
+    in page 14.
 
     Parameters:
     -----------
@@ -24,13 +26,14 @@ def chi(state: KeccakState) -> KeccakState:
     """
     updated_state = np.zeros((5, 5, 64), dtype=np.uint8)
 
-    for z in range(64):
+    for x in range(5):
         for y in range(5):
-            row_x = state[:, y, z]
-            row_x_plus_1 = state[[1, 2, 3, 4, 0], y, z]
-            row_x_plus_2 = state[[2, 3, 4, 0, 1], y, z]
-
-            updated_state[:, y, z] = row_x ^ ((1 ^ row_x_plus_1) & row_x_plus_2)
+            for z in range(64):
+                updated_state = (
+                    state[x, y, z]
+                    ^ (state[(x + 1) % 5, y, z] ^ 1)
+                    * state[(x + 2) % 5, y, z]
+                )
 
     return updated_state
 
