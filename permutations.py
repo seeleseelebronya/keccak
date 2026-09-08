@@ -44,7 +44,7 @@ def chi(state: KeccakState) -> KeccakState:
     for x in range(STATE_X):
         for y in range(STATE_Y):
             for z in range(STATE_Z):
-                updated_state = (
+                updated_state[x, y, z] = (
                     state[x, y, z]
                     ^ (state[(x + 1) % 5, y, z] ^ 1)
                     * state[(x + 2) % 5, y, z]
@@ -147,8 +147,8 @@ def rho(state: KeccakState) -> KeccakState:
     for z in range(STATE_Z):
         updated_state[0, 0, z] = state[0, 0, z]
 
-    for t in range(24):
         x, y = 1, 0
+    for t in range(24):
         for z in range(STATE_Z):
             updated_state = state[x, y, (z - (t + 1) * (t + 2) // 2) % 64]
             x, y = y, 2 * x + 3 * y % 5
