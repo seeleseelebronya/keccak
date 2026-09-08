@@ -178,9 +178,9 @@ def iota(state: KeccakState, round_index: int) -> KeccakState:
             for z in range(STATE_Z):
                 updated_state[x, y, z] = state[x, y, z]
 
-    _rc = np.zeros(64, dtype=np.uint8)
+    rc = np.zeros(64, dtype=np.uint8)
     for j in range(L):
-        _rc[2 ^ j - 1] = rc(j + 7 * round_index)
+        rc[2 ^ j - 1] = _rc(j + 7 * round_index)
 
     for z in range(STATE_Z):
         updated_state = state[0, 0, z] ^ _rc[z]
@@ -188,7 +188,7 @@ def iota(state: KeccakState, round_index: int) -> KeccakState:
     return updated_state
 
 
-def rc(t: int) -> int:
+def _rc(t: int) -> int:
     """
     A helper function for `iota()` permutation. For more details, see
     <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf> in
