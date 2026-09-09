@@ -32,7 +32,7 @@ L = int(np.log2(STATE_Z))
 KeccakState = UInt8[np.ndarray, f"{STATE_X} {STATE_Y} {STATE_Z}"]
 
 
-@jaxtyped(typechecker=typechecked)
+@typechecked
 def chi(state: KeccakState) -> KeccakState:
     """The Chi (χ) permutation.
 
@@ -59,7 +59,7 @@ def chi(state: KeccakState) -> KeccakState:
 
     return updated_state
 
-@jaxtyped(typechecker=typechecked)
+@typechecked
 def theta(state: KeccakState) -> KeccakState:
     """The Theta (θ) permutation.
 
@@ -99,7 +99,7 @@ def theta(state: KeccakState) -> KeccakState:
     return updated_state
 
 
-@jaxtyped(typechecker=typechecked)
+@typechecked
 def pi(state: KeccakState) -> KeccakState:
     """The Pi (π) permutation.
 
@@ -123,7 +123,7 @@ def pi(state: KeccakState) -> KeccakState:
     return updated_state
 
 
-@jaxtyped(typechecker=typechecked)
+@typechecked
 def rho(state: KeccakState) -> KeccakState:
     """The Rho (ρ) permutation.
 
@@ -145,13 +145,15 @@ def rho(state: KeccakState) -> KeccakState:
     x, y = 1, 0
     for t in range(24):
         for z in range(STATE_Z):
-            updated_state = state[x, y, (z - (t + 1) * (t + 2) // 2) % 64]
-            x, y = y, 2 * x + 3 * y % 5
+            updated_state[x, y, z] = state[
+                x, y, (z - (t + 1) * (t + 2) // 2) % 64
+            ]
+            x, y = y, (2 * x + 3 * y) % 5
 
     return updated_state
 
 
-@jaxtyped(typechecker=typechecked)
+@typechecked
 def iota(state: KeccakState, round_index: int) -> KeccakState:
     """The Iota (ι) permutation.
 
