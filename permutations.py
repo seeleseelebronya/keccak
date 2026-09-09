@@ -1,43 +1,50 @@
+"""Keccak-f[1600] State Permutations.
+
+This module provides bit-level, explicit implementations of the five core
+state transformations (Theta, Rho, Pi, Chi, Iota) specified in NIST FIPS 202
+(Link: <https://csrc.nist.gov/pubs/fips/202/final>).
+
+State representation:
+    A 3D NumPy array of shape (5, 5, 64) with `np.uint8` dtype, where each
+    element represents a single bit (0 or 1).
+"""
+
 import numpy as np
 from jaxtyping import UInt8, jaxtyped
 from typeguard import typechecked
 
-# Length of row
+# Length of rows
 STATE_X = 5
 
-# Length of column
+# Length of columns
 STATE_Y = 5
 
-# Length of lane
+# Length of lanes (also w in NIST FIPS 202)
 STATE_Z = 64
 
-# Shape of a state, 5 x 5 x 64
+# Shape of a state, which is 5x5x64
 STATE_SHAPE = (STATE_X, STATE_Y, STATE_Z)
 
 # L satisfies STATE_Z = 2 ^ L
 L = int(np.log2(STATE_Z))
 
-# Type of a valid Keccak state, which is a 5 x 5 x 64 state.
+# Type of a valid Keccak state, which is a 5x5x64 state cube
 KeccakState = UInt8[np.ndarray, f"{STATE_X} {STATE_Y} {STATE_Z}"]
 
 
 @jaxtyped(typechecker=typechecked)
 def chi(state: KeccakState) -> KeccakState:
-    """
-    The implementation of the _Chi_ permutation. For more details, see
-    <https://keccak.team/files/Keccak-reference-3.0.pdf> in page 15, or see
-    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf>
-    in page 14.
+    """The Chi (χ) permutation.
 
     Parameters:
     -----------
     state: KeccakState
-        The Keccak state for the _Chi_ permutation.
+        The current 5x5x64 Keccak state cube.
 
     Returns:
     --------
     updated_state: KeccakState
-        The state after _Chi_ permutation.
+        The updated 5x5x64 Keccak state cube after Chi transformation.
     """
     updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
@@ -54,21 +61,17 @@ def chi(state: KeccakState) -> KeccakState:
 
 @jaxtyped(typechecker=typechecked)
 def theta(state: KeccakState) -> KeccakState:
-    """
-    The implementation of the _Theta_ permutation. For more details, see
-    <https://keccak.team/files/Keccak-reference-3.0.pdf> in page 17, or see
-    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf>
-    in page 11.
+    """The Theta (θ) permutation.
 
     Parameters:
     -----------
     state: KeccakState
-        The Keccak state for the _Theta_ permutation.
+        The current 5x5x64 Keccak state cube.
 
     Returns:
     --------
     updated_state: KeccakState
-        The state after _Theta_ permutation.
+        The updated 5x5x64 Keccak state cube after Chi transformation.
     """
     updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
@@ -98,21 +101,17 @@ def theta(state: KeccakState) -> KeccakState:
 
 @jaxtyped(typechecker=typechecked)
 def pi(state: KeccakState) -> KeccakState:
-    """
-    The implementation of the _Pi_ permutation. For more details, see
-    <https://keccak.team/files/Keccak-reference-3.0.pdf> in page 19, or see
-    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf>
-    in page 13.
+    """The Pi (π) permutation.
 
     Parameters:
     -----------
     state: KeccakState
-        The Keccak state for the _Pi_ permutation.
+        The current 5x5x64 Keccak state cube.
 
     Returns:
     --------
     updated_state: KeccakState
-        The state after _Pi_ permutation.
+        The updated 5x5x64 Keccak state cube after Pi transformation.
     """
     updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
@@ -126,21 +125,17 @@ def pi(state: KeccakState) -> KeccakState:
 
 @jaxtyped(typechecker=typechecked)
 def rho(state: KeccakState) -> KeccakState:
-    """
-    The implementation of the _Rho_ permutation. For more details, see
-    <https://keccak.team/files/Keccak-reference-3.0.pdf> in page 21, or see
-    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf>
-    in page 12.
+    """The Rho (ρ) permutation.
 
     Parameters:
     -----------
     state: KeccakState
-        The Keccak state for the _Rho_ permutation.
+        The current 5x5x64 Keccak state cube.
 
     Returns:
     --------
     updated_state: KeccakState
-        The state after _Rho_ permutation.
+        The updated 5x5x64 Keccak state cube after Rho transformation.
     """
     updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
@@ -158,22 +153,17 @@ def rho(state: KeccakState) -> KeccakState:
 
 @jaxtyped(typechecker=typechecked)
 def iota(state: KeccakState, round_index: int) -> KeccakState:
-    """
-    The implementation of the _Iota_ permutation. For more details, see
-    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf> in
-    page 16.
+    """The Iota (ι) permutation.
 
     Parameters:
     -----------
     state: KeccakState
-        The Keccak state for the _Pi_ permutation.
-    round_index: int
-        The round index i_r.
+        The current 5x5x64 Keccak state cube.
 
     Returns:
     --------
     updated_state: KeccakState
-        The state after _Pi_ permutation.
+        The updated 5x5x64 Keccak state cube after Iota transformation.
     """
     updated_state = np.zeros(STATE_SHAPE, dtype=np.uint8)
 
@@ -193,18 +183,14 @@ def iota(state: KeccakState, round_index: int) -> KeccakState:
 
 
 def _rc(t: int) -> int:
-    """
-    A helper function for `iota()` permutation. For more details, see
-    <https://csrc.nist.gov/files/pubs/fips/202/final/docs/fips_202_draft.pdf> in
-    page 15.
+    """A helper function for `iota()` permutation.
 
     Parameters:
     -----------
     t: integer
 
     Returns:
-    rc(t): int
-        Type of rc(t) is actually _bit_.
+    rc(t): int, actually a bit
     """
     mod = t % 255
     if mod == 0:
