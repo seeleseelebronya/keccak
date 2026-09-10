@@ -174,12 +174,12 @@ def iota(state: KeccakState, round_index: int) -> KeccakState:
             for z in range(STATE_Z):
                 updated_state[x, y, z] = state[x, y, z]
 
-    rc = np.zeros(64, dtype=np.uint8)
-    for j in range(L):
+    rc = np.zeros(STATE_Z, dtype=np.uint8)
+    for j in range(L + 1):
         rc[2 ** j - 1] = _rc(j + 7 * round_index)
 
     for z in range(STATE_Z):
-        updated_state = state[0, 0, z] ^ rc[z]
+        updated_state[0, 0, z] = updated_state[0, 0, z] ^ rc[z]
 
     return updated_state
 
@@ -200,13 +200,13 @@ def _rc(t: int) -> int:
 
     r = [1, 0, 0, 0, 0, 0, 0, 0]
     for _ in range(mod):
-       r.insert(0, 0)
+        r.insert(0, 0)
 
-       r[0] = r[0] + r[8]
-       r[4] = r[4] + r[8]
-       r[5] = r[5] + r[8]
-       r[6] = r[6] + r[8]
+        r[0] = r[0] ^ r[8]
+        r[4] = r[4] ^ r[8]
+        r[5] = r[5] ^ r[8]
+        r[6] = r[6] ^ r[8]
 
-       r = r[:8]
+        r = r[:8]
 
     return r[0]
