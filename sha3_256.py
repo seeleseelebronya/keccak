@@ -22,13 +22,14 @@ def sha3_256(message: bytes) -> str:
         a.k.a. hash value. The digest often serves as a condensed
         representation of the message.
     """
-    m = bytes_to_bits(message) + BitArray(bin="01")
+    m = _bytes_to_bits(message) + BitArray(bin="01")
     digest_bits = keccak(512, m, 256)
-    return bits_to_bytes(digest_bits).hex()
+    return _bits_to_bytes(digest_bits).hex()
 
 
-def bytes_to_bits(data: bytes) -> BitArray:
-    """Convert bytes to BitArray using FIPS 202 B.1 convention (LSB first)."""
+def _bytes_to_bits(data: bytes) -> BitArray:
+    """Convert bytes to BitArray using FIPS 202 B.1 convention (LSB first).
+    """
     bits = []
     for b in data:
         for j in range(8):
@@ -36,8 +37,9 @@ def bytes_to_bits(data: bytes) -> BitArray:
     return BitArray(bits)
 
 
-def bits_to_bytes(s: BitArray) -> bytes:
-    """Convert BitArray to bytes using FIPS 202 B.1 convention (LSB first)."""
+def _bits_to_bytes(s: BitArray) -> bytes:
+    """Convert BitArray to bytes using FIPS 202 B.1 convention (LSB first).
+    """
     res = bytearray()
     for i in range(0, len(s), 8):
         byte_val = 0

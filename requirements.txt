@@ -1,4 +1,5 @@
 bitstring
 numpy
+pytest
 taxtyping
 typeguard
