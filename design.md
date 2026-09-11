@@ -1,5 +1,10 @@
 # Design Document
 
+## References
+
+* **NIST FIPS 202**:
+  [SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions](https://csrc.nist.gov/pubs/fips/202/final)
+
 ## Project structure
 
 ### `influence.py`
@@ -46,16 +51,20 @@ The required python libs.
 Implements padding, sponge construction, and bitstream-to-state conversions.
 
 * `sha3_256(message: bytes) -> str`
+  * **Spec Reference**: Section 6.1 (SHA3-256 Specification)
   * **Main API**: Accepts raw message bytes, appends the SHA-3 domain
   separator (`01`), pads the sequence, executes the Keccak sponge pipeline, and
   returns the 256-bit digest as a hexadecimal string.
 * `keccak_p(s: BitArray, b: int = 1600, rounds: int = 24) -> BitArray`
+  * **Spec Reference**: Section 3.3, Algorithm 7 ($KECCAK\text{-}p[b, n_r]$)
   * Runs $n_r$ iterations of the round permutation
   $Rnd = \iota \circ \chi \circ \pi \circ \rho \circ \theta$ on a 1600-bit
   vector.
 * `sponge(pad: Callable, r: int, m: BitArray, d: int) -> BitArray`
+  * **Spec Reference**: Section 4 (Sponge Construction)
   * Absorbs $r$-bit blocks into the Keccak state and squeezes $d$ output bits.
 * `pad_10_asterisk_1(x: int, m: int) -> BitArray`
+  * **Spec Reference**: Section 5.1, Algorithm 9 ($pad10^*1$)
   * Multi-rate padding rule ($pad10^*1$) satisfying $m + |Z| \equiv 0 \pmod x$.
 
 ### `permutations.py`
@@ -64,13 +73,19 @@ Handles state transformations operating on a 3D NumPy array of shape
 $(5, 5, 64)$ with `uint8` data type (`KeccakState`).
 
 * `theta(state: KeccakState) -> KeccakState`
+  * **Spec Reference**: Section 3.2.1, Algorithm 1 ($\theta$)
   * Computes parity bits for each column and applies column-wise XOR diffusion.
 * `rho(state: KeccakState) -> KeccakState`
+  * **Spec Reference**: Section 3.2.2, Algorithm 2 ($\rho$)
   * Performs triangular lane rotations along the $z$-axis for specified shifts.
 * `pi(state: KeccakState) -> KeccakState`
+  * **Spec Reference**: Section 3.2.3, Algorithm 3 ($\pi$)
   * Permutes the order of the 25 lanes within the state grid.
 * `chi(state: KeccakState) -> KeccakState`
+  * **Spec Reference**: Section 3.2.4, Algorithm 4 ($\chi$)
   * Applies non-linear bitwise operations across row elements ($x$-axis).
 * `iota(state: KeccakState, round_index: int) -> KeccakState`
+  * **Spec Reference**: Section 3.2.5, Algorithm 5 (`rc`) & Algorithm 6
+    ($\iota$)
   * Injects round constants ($RC$) into lane $(0,0)$ to break rotational
     symmetry.
