@@ -1,7 +1,7 @@
 from sha3_256 import sha3_256
 import hashlib
 
-input = b""
+MESSAGES = [b"", b"abc", b"hello", b"1234"]
 
-print("my lib:     ", sha3_256(input))
-print("offical lib:", hashlib.sha3_256(input).hexdigest())
+for message in MESSAGES:
+    assert sha3_256(message) == hashlib.sha3_256(message).hexdigest()
