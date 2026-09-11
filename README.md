@@ -40,6 +40,7 @@ git clone https://github.com/seeleseelebronya/keccak.git
 ```
 
 * Create python virtual environment:
+  * **In project directory**:
   * Linux/macOS:
   ```bash
   python -m venv .venv
